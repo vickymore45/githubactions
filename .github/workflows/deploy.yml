@@ -38,58 +38,21 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     
-    - name: Notify on success
-      if: success()
-      run: |
-          curl -X POST https://api.sendgrid.com/v3/mail/send \
-            -H "Authorization: Bearer $SENDGRID_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-                  "personalizations": [
-                    {
-                      "to": [
-                        {
-                          "email": "vickymore45@gmail.com"  # Replace with the email you want to send notifications to
-                        }
-                      ],
-                      "subject": "Workflow Succeeded",
-                      "content": [
-                        {
-                          "type": "text/plain",
-                          "value": "Your workflow succeeded."
-                        }
-                      ]
-                    }
-                  ],
-                  "from": {
-                    "email": "notifications@github.com"  # Replace with the sender's email
-                  }
-                }'
-
-    - name: Notify on failure
-      if: failure()
-      run: |
-          curl -X POST https://api.sendgrid.com/v3/mail/send \
-            -H "Authorization: Bearer $SENDGRID_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-                  "personalizations": [
-                    {
-                      "to": [
-                        {
-                          "email": "vickymore45@gmail.com"  # Replace with the email you want to send notifications to
-                        }
-                      ],
-                      "subject": "Workflow Failed",
-                      "content": [
-                        {
-                          "type": "text/plain",
-                          "value": "Your workflow failed."
-                        }
-                      ]
-                    }
-                  ],
-                  "from": {
-                    "email": "notifications@github.com"  # Replace with the sender's email
-                  }
-                }'
+    - name: Send mail
+      if: always()
+      uses: dawidd6/action-send-mail@v2
+      with:
+          # mail server settings
+          server_address: smtp.gmail.com
+          server_port: 465
+          # user credentials
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          # email subject
+          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
+          # email body as text
+          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+          # comma-separated string, send email to
+          to: morevicky381@gmail.com
+          # from email name
+          from: Github Actions
