@@ -74,5 +74,29 @@ jobs:
 * Make a code change in your repository and push it to the main branch.
 * Go to the "Actions" tab in your GitHub repository to monitor the workflow progress.
 * Check your AWS ECR repository for the newly pushed Docker image.
+### 6. Add Email Notification Step to the GitHub Actions Workflow
+* According to your requirements, you can configure your workflow to send email notifications based on the status of workflow.
+* Add the following step at the end of your GitHub Actions workflow YAML file (deploy.yml) to send email notifications:
+~~~
+- name: Send mail
+      if: always()
+      uses: dawidd6/action-send-mail@v2
+      with:
+          # mail server settings
+          server_address: smtp.gmail.com
+          server_port: 465
+          # user credentials
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          # email subject
+          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
+          # email body as text
+          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+          # comma-separated string, send email to
+          to: <username@email.com>
+          # from email name
+          from: <username>
+~~~
+* The above configuration will send notifications to any specified email based on the job status.
 # Conclusion
 This documentation outlines the steps to automate Docker image builds and uploads to AWS ECR using GitHub Actions. Customize the workflow YAML file and secrets according to your specific project requirements.
